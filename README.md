@@ -14,15 +14,12 @@ java -jar employee-service.jar
 
 http://localhost:8081/employeeservice/swagger-ui.html#/
 
------------------
-Project Overview:
------------------
-employee-app
-	Final app that we will be building as part of development.
-employee-app-starter
-	Initial code to start building the REST client.
-employee-service
-	Actual source code for the employee-service-executable.
-employee-service-executable
-	This contains the jar file which contains the necessary code that exposes the end points.
-	Its a Spring Boot application.
+## Project Overview:
+
+- **employee-app:** Final app that we will be building as part of development.
+
+- **employee-app-starter:** Initial code to start building the REST client.
+
+- **employee-service:** Actual SpringBoot application source code for the employee-service-executable.
+
+- **employee-service-executable:** This contains the jar file which contains the necessary code that exposes the end points.
