@@ -10,7 +10,7 @@ This repository explores the WebClient API to perform Rest API calls
 java -jar employee-service.jar
 ```
 
-- The complete swagger spec is available in tthe below link.
+- The complete swagger spec is available in the below link.
 
 http://localhost:8081/employeeservice/swagger-ui.html#/
 
