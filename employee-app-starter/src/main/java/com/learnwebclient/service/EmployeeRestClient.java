@@ -19,7 +19,7 @@ public class EmployeeRestClient {
     public List<Employee> retrieveAllEmployees() {
         return webClient.get()
                 .uri(EmployeeConstants.GET_ALL_EMPLOYEES_V1)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
                 .retrieve()
                 .bodyToFlux(Employee.class)
                 .collectList()
