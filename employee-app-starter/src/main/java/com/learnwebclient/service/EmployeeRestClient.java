@@ -2,11 +2,14 @@ package com.learnwebclient.service;
 
 import com.learnwebclient.constants.EmployeeConstants;
 import com.learnwebclient.dto.Employee;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 
+@Slf4j
 public class EmployeeRestClient {
 
     private WebClient webClient;
@@ -24,6 +27,27 @@ public class EmployeeRestClient {
                 .bodyToFlux(Employee.class)
                 .collectList()
                 .block();
-   }
+    }
+
+    //http://localhost:8081/employeeservice/v1/employee/1
+    public Employee retrieveEmployeeById(int id) {
+        try {
+            return webClient.get()
+                    .uri(EmployeeConstants.EMPLOYEE_BY_ID_V1, id)
+                    .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(Employee.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            log.error("Error Response Code is {} and the body is {}",
+                    ex.getRawStatusCode(),
+                    ex.getResponseBodyAsString());
+            log.error("WebClientResponseException in retrieveEmployeeById ", ex);
+            throw ex;
+        } catch (Exception e) {
+            log.error("Exception in retrieveEmployeeById ", e);
+            throw e;
+        }
+    }
 
 }
