@@ -51,4 +51,21 @@ public class EmployeeRestClientTest {
                 () -> employeeRestClient.retrieveEmployeeByName(name));
     }
 
+    @Test
+    void testAddNewEmployee() {
+        Employee employee = new Employee(10, "Spider", "Man",
+                "male", 0, "SSE" );
+        Employee employee1 = employeeRestClient.addNewEmployee(employee);
+        System.out.println(employee1);
+        Assertions.assertTrue(employee1.getId()!=0);
+    }
+
+    @Test
+    void testAddNewEmployee_badRequest() {
+        Employee employee = new Employee(10, null, "Man",
+                "male", 0, "SSE" );
+        Assertions.assertThrows(WebClientResponseException.class,
+                () -> employeeRestClient.addNewEmployee(employee));
+    }
+
 }

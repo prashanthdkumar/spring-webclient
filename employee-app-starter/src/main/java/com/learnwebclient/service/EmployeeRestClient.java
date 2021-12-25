@@ -76,4 +76,26 @@ public class EmployeeRestClient {
         }
     }
 
+    //http://localhost:8081/employeeservice/v1/employee
+    public Employee addNewEmployee(Employee employee) {
+        try {
+            return webClient.post()
+                    .uri(EmployeeConstants.ADD_NEW_EMPLOYEE_V1)
+                    .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                    .syncBody(employee)
+                    .retrieve()
+                    .bodyToMono(Employee.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            log.error("Error Response Code is {} and the body is {}",
+                    ex.getRawStatusCode(),
+                    ex.getResponseBodyAsString());
+            log.error("WebClientResponseException in addNewEmployee ", ex);
+            throw ex;
+        } catch (Exception e) {
+            log.error("Exception in addNewEmployee ", e);
+            throw e;
+        }
+    }
+
 }
