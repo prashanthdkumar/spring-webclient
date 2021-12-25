@@ -35,4 +35,20 @@ public class EmployeeRestClientTest {
                 () -> employeeRestClient.retrieveEmployeeById(id));
     }
 
+    @Test
+    void testRetrieveEmployeeByName() {
+        String name = "Chris";
+        List<Employee> employeeList = employeeRestClient.retrieveEmployeeByName(name);
+        Assertions.assertTrue(employeeList.size() > 0);
+        Employee employee = employeeList.get(0);
+        Assertions.assertEquals("Chris", employee.getFirstName());
+    }
+
+    @Test
+    void testRetrieveEmployeeByName_notFound() {
+        String name = "ABC";
+        Assertions.assertThrows(WebClientResponseException.class,
+                () -> employeeRestClient.retrieveEmployeeByName(name));
+    }
+
 }

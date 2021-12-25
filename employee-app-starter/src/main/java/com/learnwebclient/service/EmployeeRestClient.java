@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -46,6 +47,31 @@ public class EmployeeRestClient {
             throw ex;
         } catch (Exception e) {
             log.error("Exception in retrieveEmployeeById ", e);
+            throw e;
+        }
+    }
+
+    //http://localhost:8081/employeeservice/v1/employeeName?employee_name=Chris
+    public List<Employee> retrieveEmployeeByName(String employeeName) {
+        String uri = UriComponentsBuilder.fromUriString(EmployeeConstants.EMPLOYEE_BY_NAME_V1)
+                .queryParam("employee_name", employeeName)
+                .build().toUriString();
+        try {
+            return webClient.get()
+                    .uri(uri)
+                    .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToFlux(Employee.class)
+                    .collectList()
+                    .block();
+        } catch (WebClientResponseException ex) {
+            log.error("Error Response Code is {} and the body is {}",
+                    ex.getRawStatusCode(),
+                    ex.getResponseBodyAsString());
+            log.error("WebClientResponseException in retrieveEmployeeByName ", ex);
+            throw ex;
+        } catch (Exception e) {
+            log.error("Exception in retrieveEmployeeByName ", e);
             throw e;
         }
     }
