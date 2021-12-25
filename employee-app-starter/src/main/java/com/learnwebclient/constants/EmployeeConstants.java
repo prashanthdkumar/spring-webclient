@@ -6,5 +6,4 @@ public class EmployeeConstants {
     public static final String EMPLOYEE_BY_ID_V1 = "/v1/employee/{id}";
     public static final String EMPLOYEE_BY_NAME_V1 = "/v1/employeeName";
     public static final String ADD_NEW_EMPLOYEE_V1 = "/v1/employee";
-
 }

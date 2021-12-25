@@ -68,4 +68,21 @@ public class EmployeeRestClientTest {
                 () -> employeeRestClient.addNewEmployee(employee));
     }
 
+    @Test
+    void testUpdateEmployee() {
+        Employee employee = new Employee(10, "Spider1", "Man1",
+                "male", 0, "SSE" );
+        Employee employee1 = employeeRestClient.updateEmployee(6, employee);
+        Assertions.assertEquals("Spider1", employee1.getFirstName());
+        Assertions.assertEquals("Man1", employee1.getLastName());
+    }
+
+    @Test
+    void testUpdateEmployee_notFound() {
+        Employee employee = new Employee(10, "Spider1", "Man1",
+                "male", 0, "SSE" );
+        Assertions.assertThrows(WebClientResponseException.class,
+                () -> employeeRestClient.updateEmployee(61, employee));
+    }
+
 }
