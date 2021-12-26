@@ -1,6 +1,8 @@
 package com.learnwebclient.service;
 
 import com.learnwebclient.dto.Employee;
+import com.learnwebclient.exception.ClientDataException;
+import com.learnwebclient.exception.EmployeeServiceException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,6 +35,13 @@ public class EmployeeRestClientTest {
         int id = 10;
         Assertions.assertThrows(WebClientResponseException.class,
                 () -> employeeRestClient.retrieveEmployeeById(id));
+    }
+
+    @Test
+    void retrieveEmployeeById_custom_error_handling() {
+        int id = 10;
+        Assertions.assertThrows(ClientDataException.class,
+                () -> employeeRestClient.retrieveEmployeeById_custom_error_handling(id));
     }
 
     @Test
@@ -72,7 +81,7 @@ public class EmployeeRestClientTest {
     void testUpdateEmployee() {
         Employee employee = new Employee(10, "Spider1", "Man1",
                 "male", 0, "SSE" );
-        Employee employee1 = employeeRestClient.updateEmployee(6, employee);
+        Employee employee1 = employeeRestClient.updateEmployee(3, employee);
         Assertions.assertEquals("Spider1", employee1.getFirstName());
         Assertions.assertEquals("Man1", employee1.getLastName());
     }
@@ -99,6 +108,12 @@ public class EmployeeRestClientTest {
     void testDeleteEmployee_notFound() {
         Assertions.assertThrows(WebClientResponseException.class,
                 () -> employeeRestClient.deleteEmployee(61));
+    }
+
+    @Test
+    void testErrorEndpoint() {
+        Assertions.assertThrows(EmployeeServiceException.class,
+                () -> employeeRestClient.errorEndpoint());
     }
 
 }

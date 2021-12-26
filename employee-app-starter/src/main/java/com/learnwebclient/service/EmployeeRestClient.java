@@ -2,11 +2,16 @@ package com.learnwebclient.service;
 
 import com.learnwebclient.constants.EmployeeConstants;
 import com.learnwebclient.dto.Employee;
+import com.learnwebclient.exception.ClientDataException;
+import com.learnwebclient.exception.EmployeeServiceException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -49,6 +54,34 @@ public class EmployeeRestClient {
             log.error("Exception in retrieveEmployeeById ", e);
             throw e;
         }
+    }
+
+    //http://localhost:8081/employeeservice/v1/employee/1
+    public Employee retrieveEmployeeById_custom_error_handling(int id) {
+        return webClient.get()
+                .uri(EmployeeConstants.EMPLOYEE_BY_ID_V1, id)
+                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse -> handle4xxError(clientResponse))
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> handle5xxError(clientResponse))
+                .bodyToMono(Employee.class)
+                .block();
+    }
+
+    private Mono<? extends Throwable> handle4xxError(ClientResponse clientResponse) {
+        Mono<String> errorMessage = clientResponse.bodyToMono(String.class);
+        return errorMessage.flatMap((message) -> {
+            log.error("Error Response Code is " + clientResponse.rawStatusCode() + " and the message is " + message);
+            throw new ClientDataException(message);
+        });
+    }
+
+    private Mono<? extends Throwable> handle5xxError(ClientResponse clientResponse) {
+        Mono<String> errorMessage = clientResponse.bodyToMono(String.class);
+        return errorMessage.flatMap((message) -> {
+            log.error("Error Response Code is " + clientResponse.rawStatusCode() + " and the message is " + message);
+            throw new EmployeeServiceException(message);
+        });
     }
 
     //http://localhost:8081/employeeservice/v1/employeeName?employee_name=Chris
@@ -112,7 +145,7 @@ public class EmployeeRestClient {
             log.error("Error Response Code is {}-{} and the body is {} and Status Text {}",
                     ex.getRawStatusCode(),
                     ex.getStatusCode(),
-                    ex.getResponseBodyAsString() ,
+                    ex.getResponseBodyAsString(),
                     ex.getStatusText());
             log.error("WebClientResponseException in updateEmployee ", ex);
             throw ex;
@@ -131,11 +164,11 @@ public class EmployeeRestClient {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-        }  catch (WebClientResponseException ex) {
+        } catch (WebClientResponseException ex) {
             log.error("Error Response Code is {}-{} and the body is {} and Status Text {}",
                     ex.getRawStatusCode(),
                     ex.getStatusCode(),
-                    ex.getResponseBodyAsString() ,
+                    ex.getResponseBodyAsString(),
                     ex.getStatusText());
             log.error("WebClientResponseException in deleteEmployee ", ex);
             throw ex;
@@ -143,6 +176,18 @@ public class EmployeeRestClient {
             log.error("Exception in deleteEmployee ", e);
             throw e;
         }
+    }
+
+    //http://localhost:8081/employeeservice/v1/employee/error
+    public String errorEndpoint() {
+        return webClient.get()
+                .uri(EmployeeConstants.ERROR_EMPLOYEE_V1)
+                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse -> handle4xxError(clientResponse))
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> handle5xxError(clientResponse))
+                .bodyToMono(String.class)
+                .block();
     }
 
 }
