@@ -12,13 +12,29 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+import reactor.retry.Retry;
 
+import java.time.Duration;
 import java.util.List;
 
 @Slf4j
 public class EmployeeRestClient {
 
     private WebClient webClient;
+
+    public Retry<?> fixedRetry = Retry.anyOf(WebClientResponseException.class)
+            .fixedBackoff(Duration.ofSeconds(2))
+            .retryMax(3)
+            .doOnRetry(message -> {
+                log.error("Exception is {}", message);
+            });
+
+    public Retry<?> fixedRetry5xx = Retry.anyOf(EmployeeServiceException.class)
+            .fixedBackoff(Duration.ofSeconds(2))
+            .retryMax(3)
+            .doOnRetry(message -> {
+                log.error("Exception is {}", message);
+            });
 
     public EmployeeRestClient(WebClient webClient) {
         this.webClient = webClient;
@@ -43,6 +59,28 @@ public class EmployeeRestClient {
                     .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
                     .retrieve()
                     .bodyToMono(Employee.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            log.error("Error Response Code is {} and the body is {}",
+                    ex.getRawStatusCode(),
+                    ex.getResponseBodyAsString());
+            log.error("WebClientResponseException in retrieveEmployeeById ", ex);
+            throw ex;
+        } catch (Exception e) {
+            log.error("Exception in retrieveEmployeeById ", e);
+            throw e;
+        }
+    }
+
+    //http://localhost:8081/employeeservice/v1/employee/1
+    public Employee retrieveEmployeeById_withRetry(int id) {
+        try {
+            return webClient.get()
+                    .uri(EmployeeConstants.EMPLOYEE_BY_ID_V1, id)
+                    .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(Employee.class)
+                    .retryWhen(fixedRetry)
                     .block();
         } catch (WebClientResponseException ex) {
             log.error("Error Response Code is {} and the body is {}",
@@ -187,6 +225,7 @@ public class EmployeeRestClient {
                 .onStatus(HttpStatus::is4xxClientError, clientResponse -> handle4xxError(clientResponse))
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> handle5xxError(clientResponse))
                 .bodyToMono(String.class)
+                .retryWhen(fixedRetry5xx)
                 .block();
     }
 

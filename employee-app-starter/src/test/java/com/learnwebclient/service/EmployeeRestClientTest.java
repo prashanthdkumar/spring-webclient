@@ -2,11 +2,11 @@ package com.learnwebclient.service;
 
 import com.learnwebclient.dto.Employee;
 import com.learnwebclient.exception.ClientDataException;
-import com.learnwebclient.exception.EmployeeServiceException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.retry.RetryExhaustedException;
 
 import java.util.List;
 
@@ -38,6 +38,13 @@ public class EmployeeRestClientTest {
     }
 
     @Test
+    void testRetrieveEmployeeById_withRetry() {
+        int id = 10;
+        Assertions.assertThrows(WebClientResponseException.class,
+                () -> employeeRestClient.retrieveEmployeeById_withRetry(id));
+    }
+
+    @Test
     void retrieveEmployeeById_custom_error_handling() {
         int id = 10;
         Assertions.assertThrows(ClientDataException.class,
@@ -63,16 +70,16 @@ public class EmployeeRestClientTest {
     @Test
     void testAddNewEmployee() {
         Employee employee = new Employee(10, "Spider", "Man",
-                "male", 0, "SSE" );
+                "male", 0, "SSE");
         Employee employee1 = employeeRestClient.addNewEmployee(employee);
         System.out.println(employee1);
-        Assertions.assertTrue(employee1.getId()!=0);
+        Assertions.assertTrue(employee1.getId() != 0);
     }
 
     @Test
     void testAddNewEmployee_badRequest() {
         Employee employee = new Employee(10, null, "Man",
-                "male", 0, "SSE" );
+                "male", 0, "SSE");
         Assertions.assertThrows(WebClientResponseException.class,
                 () -> employeeRestClient.addNewEmployee(employee));
     }
@@ -80,7 +87,7 @@ public class EmployeeRestClientTest {
     @Test
     void testUpdateEmployee() {
         Employee employee = new Employee(10, "Spider1", "Man1",
-                "male", 0, "SSE" );
+                "male", 0, "SSE");
         Employee employee1 = employeeRestClient.updateEmployee(3, employee);
         Assertions.assertEquals("Spider1", employee1.getFirstName());
         Assertions.assertEquals("Man1", employee1.getLastName());
@@ -89,7 +96,7 @@ public class EmployeeRestClientTest {
     @Test
     void testUpdateEmployee_notFound() {
         Employee employee = new Employee(10, "Spider1", "Man1",
-                "male", 0, "SSE" );
+                "male", 0, "SSE");
         Assertions.assertThrows(WebClientResponseException.class,
                 () -> employeeRestClient.updateEmployee(61, employee));
     }
@@ -97,7 +104,7 @@ public class EmployeeRestClientTest {
     @Test
     void testDeleteEmployee() {
         Employee employee = new Employee(10, "Spider", "Man",
-                "male", 0, "SSE" );
+                "male", 0, "SSE");
         Employee employee1 = employeeRestClient.addNewEmployee(employee);
         System.out.println(employee1);
         String response = employeeRestClient.deleteEmployee(employee1.getId());
@@ -112,7 +119,7 @@ public class EmployeeRestClientTest {
 
     @Test
     void testErrorEndpoint() {
-        Assertions.assertThrows(EmployeeServiceException.class,
+        Assertions.assertThrows(RetryExhaustedException.class,
                 () -> employeeRestClient.errorEndpoint());
     }
 
