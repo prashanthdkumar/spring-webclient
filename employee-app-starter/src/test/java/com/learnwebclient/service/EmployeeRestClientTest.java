@@ -85,4 +85,20 @@ public class EmployeeRestClientTest {
                 () -> employeeRestClient.updateEmployee(61, employee));
     }
 
+    @Test
+    void testDeleteEmployee() {
+        Employee employee = new Employee(10, "Spider", "Man",
+                "male", 0, "SSE" );
+        Employee employee1 = employeeRestClient.addNewEmployee(employee);
+        System.out.println(employee1);
+        String response = employeeRestClient.deleteEmployee(employee1.getId());
+        Assertions.assertEquals("Employee deleted successfully.", response);
+    }
+
+    @Test
+    void testDeleteEmployee_notFound() {
+        Assertions.assertThrows(WebClientResponseException.class,
+                () -> employeeRestClient.deleteEmployee(61));
+    }
+
 }

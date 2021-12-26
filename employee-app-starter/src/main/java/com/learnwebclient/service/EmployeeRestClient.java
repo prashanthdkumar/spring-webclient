@@ -122,4 +122,27 @@ public class EmployeeRestClient {
         }
     }
 
+    //http://localhost:8081/employeeservice/v1/employee/5
+    public String deleteEmployee(int employeeId) {
+        try {
+            return webClient.delete()
+                    .uri(EmployeeConstants.EMPLOYEE_BY_ID_V1, employeeId)
+                    .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        }  catch (WebClientResponseException ex) {
+            log.error("Error Response Code is {}-{} and the body is {} and Status Text {}",
+                    ex.getRawStatusCode(),
+                    ex.getStatusCode(),
+                    ex.getResponseBodyAsString() ,
+                    ex.getStatusText());
+            log.error("WebClientResponseException in deleteEmployee ", ex);
+            throw ex;
+        } catch (Exception e) {
+            log.error("Exception in deleteEmployee ", e);
+            throw e;
+        }
+    }
+
 }
